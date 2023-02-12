@@ -84,7 +84,8 @@ class Maze:
             self._cells.append([])
             for j in range(self._col_count):
                 self._cells[i].append(Cell(self._win))
-        self._draw_cells()
+        if self._win:
+            self._draw_cells()
 
     def _draw_cells(self):
         for i in range(self._row_count):
