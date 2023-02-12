@@ -38,11 +38,15 @@ class Point:
         self.x = x
         self.y = y
 
+    def __repr__(self):
+        return f"[{self.x} {self.y}]"
+
 
 class Line:
     def __init__(self, p1: Point, p2: Point):
         self.p1 = p1
         self.p2 = p2
+
 
     def draw(self, canvas: Canvas, fill_color: str):
         canvas.create_line(self.p1.x,
@@ -69,6 +73,11 @@ class Cell:
         self._y2 = None
 
         self._window = window
+
+
+    def __repr__(self):
+        return f"({self._x1} {self._y1}) ({self._x2} {self._y2})"
+
     
     def set_coords(self, x1, y1, x2, y2):
         self._x1 = x1
@@ -92,11 +101,36 @@ class Cell:
             v_left = Line(Point(x1, y2), Point(x1, y1))
             self._window.draw_line(v_left, "black")
 
+    def draw_move(self, other_cell, undo=False):
+        color = "red" if not undo else "gray" 
+
+        mid_x = self._x2 - ((self._x2 - self._x1) / 2)
+        mid_y = self._y2 - ((self._y2 - self._y1) / 2)
+        mid = Point(mid_x, mid_y)
+
+        mid_x = other_cell._x2 - (other_cell._x2 - other_cell._x1) / 2
+        mid_y = other_cell._y2 - (other_cell._y2 - other_cell._y1) / 2
+        other_mid = Point(mid_x, mid_y)
+
+        print(mid, other_mid)
+
+        self._window.draw_line(Line(mid, other_mid), color)
+
 
 def main():
     win = Window(800, 600)
-    cell = Cell(win)
-    cell.draw(1, 1, 40, 40)
+
+    cell1 = Cell(win)
+    cell2 = Cell(win)
+    cell3 = Cell(win)
+
+    cell1.draw(2, 2, 40, 40)
+    cell2.draw(40, 2, 76, 40)
+    cell3.draw(40, 40, 76, 76)
+    
+    cell1.draw_move(cell2)
+    cell2.draw_move(cell3)
+
     win.wait_for_close()
     
 
