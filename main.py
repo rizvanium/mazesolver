@@ -1,9 +1,11 @@
 from tkinter import Tk, BOTH, Canvas
+import time
 
 
 class Window:
-    def __init__(self, width, height):
+    def __init__(self, title, width, height):
         self.__root = Tk()
+        self.__root.title(title)
         self.width = width
         self.height = height
         self.__running = False
@@ -117,22 +119,57 @@ class Cell:
         self._window.draw_line(Line(mid, other_mid), color)
 
 
+class Maze:
+    def __init__(
+            self,
+            x1,
+            y1,
+            row_count,
+            col_count,
+            cell_size,
+            win
+        ):
+        self._cells = []
+        self._x1 = x1
+        self._y1 = y1
+        self._row_count = row_count
+        self._col_count = col_count
+        self._cell_size = cell_size
+        self._win = win
+        self._create_cells()
+
+    def _create_cells(self):
+        for i in range(self._row_count):
+            self._cells.append([])
+            for j in range(self._col_count):
+                self._cells[i].append(Cell(self._win))
+        self._draw_cells()
+
+    def _draw_cells(self):
+        for i in range(self._row_count):
+            for j in range(self._col_count):
+                self._draw_cell(i, j)       
+
+    def _draw_cell(self, row_num, col_num):
+        x1 = self._x1 + col_num * self._cell_size
+        y1 = self._y1 + row_num * self._cell_size
+        x2 = x1 + self._cell_size
+        y2 = y1 + self._cell_size
+
+        self._cells[row_num][col_num].draw(x1, y1, x2, y2)
+        self._animate()
+
+    def _animate(self):
+        self._win.redraw()
+        # time.sleep(0.005)
+
+
 def main():
-    win = Window(800, 600)
+    win = Window("MazeSolver", 800, 600)
 
-    cell1 = Cell(win)
-    cell2 = Cell(win)
-    cell3 = Cell(win)
-
-    cell1.draw(2, 2, 40, 40)
-    cell2.draw(40, 2, 76, 40)
-    cell3.draw(40, 40, 76, 76)
-    
-    cell1.draw_move(cell2)
-    cell2.draw_move(cell3)
+    maze = Maze(10, 10, 15, 10, 40, win)
 
     win.wait_for_close()
-    
 
 
 if __name__ == "__main__":
