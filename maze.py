@@ -89,14 +89,14 @@ class Maze:
         self._create_cells()
         self._create_entrance_and_exit()
         self._build_a_maze((0, 0, 'place_holder'))
+        self._reset_cells_visited()
 
     def _create_cells(self):
         for i in range(self._row_count):
             self._cells.append([])
             for j in range(self._col_count):
                 self._cells[i].append(Cell(self._win))
-        if self._win:
-            self._draw_cells()
+        self._draw_cells()
 
     def _draw_cells(self):
         for i in range(self._row_count):
@@ -104,6 +104,9 @@ class Maze:
                 self._draw_cell(i, j, "black")       
 
     def _draw_cell(self, row_num, col_num, color="black"):
+        if not self._win:
+            return 
+
         x1 = self._x1 + col_num * self._cell_size
         y1 = self._y1 + row_num * self._cell_size
         x2 = x1 + self._cell_size
@@ -118,9 +121,8 @@ class Maze:
 
         self._cells[entrance_row][entrance_col].has_top_wall = False
         self._cells[exit_row][exit_col].has_bottom_wall = False
-        if self._win:
-            self._draw_cell(entrance_row, entrance_col)
-            self._draw_cell(exit_row, exit_col)
+        self._draw_cell(entrance_row, entrance_col)
+        self._draw_cell(exit_row, exit_col)
 
     def _build_a_maze(self, current):
         left_limit, right_limit = 0, self._col_count - 1
@@ -182,6 +184,12 @@ class Maze:
         elif c2_to_c1_relation == 'right':
             cell1.has_right_wall = False
             cell2.has_left_wall = False
+
+    def _reset_cells_visited(self):
+        for i in range(self._row_count):
+            for j in range(self._col_count):
+                self._cells[i][j].visited = False
+
 
     def _animate(self):
         self._win.redraw()
