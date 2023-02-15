@@ -17,7 +17,7 @@ def main():
                 win, 
                 seed
                 )
-
+    maze.solve()
     win.wait_for_close()
 
 

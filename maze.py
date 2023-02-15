@@ -61,8 +61,6 @@ class Cell:
         mid_y = other_cell._y2 - (other_cell._y2 - other_cell._y1) / 2
         other_mid = Point(mid_x, mid_y)
 
-        print(mid, other_mid)
-
         self._window.draw_line(Line(mid, other_mid), color)
 
 
@@ -190,9 +188,73 @@ class Maze:
             for j in range(self._col_count):
                 self._cells[i][j].visited = False
 
+    def solve(self):
+        self._solve_r(0, 0)
 
-    def _animate(self):
+
+    def _solve_r(self, row, col):
+        self._animate(50)
+
+        current = self._cells[row][col]
+        current.visited = True
+
+        if row == self._row_count - 1 and col == self._col_count - 1:
+            return True
+
+        left_limit, right_limit = 0, self._col_count - 1
+        top_limit, bottom_limit = 0, self._row_count - 1
+
+        top = (row - 1, col)
+        bottom = (row + 1, col)
+        left = (row, col - 1)
+        right = (row, col + 1)
+
+        if top[0] >= top_limit and top[0] <= bottom_limit:
+            top_cell = self._cells[top[0]][top[1]]
+            if not top_cell.visited and not top_cell.has_bottom_wall:
+                current.draw_move(top_cell)
+                res = self._solve_r(top[0], top[1])
+                if res:
+                    return True
+                else:
+                    top_cell.draw_move(current, True)
+
+        if bottom[0] >= top_limit and bottom[0] <= bottom_limit:
+            bottom_cell = self._cells[bottom[0]][bottom[1]]
+            if not bottom_cell.visited and not bottom_cell.has_top_wall:
+                current.draw_move(bottom_cell)
+                res = self._solve_r(bottom[0], bottom[1])
+                if res:
+                    return True
+                else:
+                    bottom_cell.draw_move(current, True)
+
+
+        if left[1] >= left_limit and left[1] <= right_limit:
+            left_cell = self._cells[left[0]][left[1]]
+            if not left_cell.visited and not left_cell.has_right_wall:
+                current.draw_move(left_cell)
+                res = self._solve_r(left[0], left[1])
+                if res:
+                    return True
+                else:
+                    left_cell.draw_move(current, True)
+
+
+        if right[1] >= left_limit and right[1] <= right_limit:
+            right_cell = self._cells[right[0]][right[1]]
+            if not right_cell.visited and not right_cell.has_left_wall:
+                current.draw_move(right_cell)
+                res = self._solve_r(right[0], right[1])
+                if res:
+                    return True
+                else:
+                    right_cell.draw_move(current, True)
+
+ 
+
+    def _animate(self, speed=100):
         self._win.redraw()
-        time.sleep(0.005)
+        time.sleep(0.05 / (speed / 100))
 
 
