@@ -87,6 +87,7 @@ class Maze:
         if seed:
             random.seed(seed)
         self._create_cells()
+        self._create_entrance_and_exit()
         self._build_a_maze((0, 0, 'place_holder'))
 
     def _create_cells(self):
@@ -96,7 +97,6 @@ class Maze:
                 self._cells[i].append(Cell(self._win))
         if self._win:
             self._draw_cells()
-            self._create_entrance_and_exit()
 
     def _draw_cells(self):
         for i in range(self._row_count):
@@ -118,9 +118,9 @@ class Maze:
 
         self._cells[entrance_row][entrance_col].has_top_wall = False
         self._cells[exit_row][exit_col].has_bottom_wall = False
-
-        self._draw_cell(entrance_row, entrance_col)
-        self._draw_cell(exit_row, exit_col)
+        if self._win:
+            self._draw_cell(entrance_row, entrance_col)
+            self._draw_cell(exit_row, exit_col)
 
     def _build_a_maze(self, current):
         left_limit, right_limit = 0, self._col_count - 1
@@ -170,8 +170,6 @@ class Maze:
             self._build_a_maze(next)
     
     def _remove_wall_between_cells(self, cell1, cell2, c2_to_c1_relation):
-        # Debug:
-        print(f"{cell2} is {c2_to_c1_relation} of {cell1}")
         if c2_to_c1_relation == 'top':
             cell1.has_top_wall = False
             cell2.has_bottom_wall = False
