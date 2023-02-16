@@ -1,4 +1,4 @@
-from renders import Window, Line, Point
+from renders import Window, Line, Point, Rectangle
 import time
 import random
 
@@ -23,6 +23,9 @@ class Cell:
         return f"({self._x1} {self._y1}) ({self._x2} {self._y2})"
 
     
+    def _coords_initialized(self):
+        return self._x1 and self._x2 and self._y1 and self._y2
+
     def set_coords(self, x1, y1, x2, y2):
         self._x1 = x1
         self._y1 = y1
@@ -63,6 +66,13 @@ class Cell:
 
         self._window.draw_line(Line(mid, other_mid), color)
 
+    def highlight(self, color):
+        if not self._coords_initialized():
+            return
+        p1 = Point(self._x1 + 5, self._y1 + 5)
+        p2 = Point(self._x2 - 5, self._y2 - 5)
+        rect = Rectangle(p1, p2)
+        self._window.draw_rectangle(rect, color)
 
 class Maze:
     def __init__(
@@ -82,12 +92,14 @@ class Maze:
         self._col_count = col_count
         self._cell_size = cell_size
         self._win = win
+        self._win.add_button("SOLVE", 5, 5, self.solve)
         if seed:
             random.seed(seed)
         self._create_cells()
         self._create_entrance_and_exit()
         self._build_a_maze((0, 0, 'place_holder'))
         self._reset_cells_visited()
+        self._win.add_mouse_listener(lambda e: self._on_mouse_change(e))
 
     def _create_cells(self):
         for i in range(self._row_count):
@@ -112,6 +124,27 @@ class Maze:
 
         self._cells[row_num][col_num].draw(x1, y1, x2, y2, color)
         self._animate()
+
+    def _on_mouse_change(self, mouse_pos):
+        cell = self._get_cell_in_mouse_pos(mouse_pos)
+        if cell:
+            cell.highlight("blue")
+
+    def _get_cell_in_mouse_pos(self, mouse_pos) -> Cell:
+        x, y = mouse_pos.x, mouse_pos.y
+        left_limit, top_limit = self._x1, self._y1
+        right_limit = self._x1 + self._cell_size * self._col_count
+        bottom_limit = self._y1 + self._cell_size * self._row_count
+
+        # If mouse is outside of a maze area, just return None
+        if x < left_limit or x > right_limit or \
+           y < top_limit or y > bottom_limit:
+               return None
+
+        row = (y - self._y1) // self._cell_size
+        col = (x - self._x1) // self._cell_size
+
+        return self._cells[row][col]
 
     def _create_entrance_and_exit(self):
         entrance_row, entrance_col = 0, 0
@@ -251,7 +284,6 @@ class Maze:
                 else:
                     right_cell.draw_move(current, True)
 
- 
 
     def _animate(self, speed=100):
         self._win.redraw()

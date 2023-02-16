@@ -4,7 +4,6 @@ from maze import Maze
 
 def main():
     win = Window("MazeSolver", 800, 600)
-    
     start_x, start_y = 40, 40
     row_count, col_count = 8, 12
     cell_size = 60
@@ -17,7 +16,7 @@ def main():
                 win, 
                 seed
                 )
-    maze.solve()
+    # maze.solve()
     win.wait_for_close()
 
 
