@@ -1,11 +1,22 @@
+from enum import Enum
 from renders import Window, Line, Point, Rectangle
 import time
 import random
 
+
+class Buff(Enum):
+    WHITE = 1, "white"
+    BLUE = 2, "blue"
+    RED = 5, "red"
+
+    def __init__(self, cost, color):
+        self.cost = cost
+        self.color = color
+
+
 class Cell:
     def __init__(self, window):
         self.visited = False
-
         self.has_left_wall = True
         self.has_right_wall = True
         self.has_top_wall = True
@@ -15,6 +26,10 @@ class Cell:
         self._y1 = None
         self._x2 = None
         self._y2 = None
+        
+        self.buff_applied = Buff.WHITE
+        self.cost = self.buff_applied.cost
+        self.bg_color = self.buff_applied.color
 
         self._window = window
 
@@ -66,13 +81,22 @@ class Cell:
 
         self._window.draw_line(Line(mid, other_mid), color)
 
-    def highlight(self, color):
+    def highlight(self, color: str) -> None:
         if not self._coords_initialized():
             return
         p1 = Point(self._x1 + 5, self._y1 + 5)
         p2 = Point(self._x2 - 5, self._y2 - 5)
         rect = Rectangle(p1, p2)
         self._window.draw_rectangle(rect, color)
+
+    def apply_buff(self, buff: Buff) -> None:
+        self.cost = buff.cost
+        self.bg_color = buff.color
+        self.buff_applied = buff
+        p1 = Point(self._x1 + 5, self._y1 + 5)
+        p2 = Point(self._x2 - 5, self._y2 - 5)
+        self._window.draw_rectangle(Rectangle(p1, p2), self.bg_color)
+
 
 class Maze:
     def __init__(
@@ -91,6 +115,8 @@ class Maze:
         self._row_count = row_count
         self._col_count = col_count
         self._cell_size = cell_size
+        self._selected_buff = Buff.RED
+        self._selected_cell = None
         self._win = win
         self._win.add_button("SOLVE", 5, 5, self.solve)
         if seed:
@@ -99,7 +125,8 @@ class Maze:
         self._create_entrance_and_exit()
         self._build_a_maze((0, 0, 'place_holder'))
         self._reset_cells_visited()
-        self._win.add_mouse_listener(lambda e: self._on_mouse_change(e))
+        self._win.add_mouse_listener(lambda e: self._on_mouse_pos_change(e))
+        self._win.add_mouse_click_listener(lambda e: self._on_mouse_click(e))
 
     def _create_cells(self):
         for i in range(self._row_count):
@@ -125,13 +152,20 @@ class Maze:
         self._cells[row_num][col_num].draw(x1, y1, x2, y2, color)
         self._animate()
 
-    def _on_mouse_change(self, mouse_pos):
-        cell = self._get_cell_in_mouse_pos(mouse_pos)
-        if cell:
-            cell.highlight("blue")
+    def _on_mouse_pos_change(self, event) -> None:
+        cell = self._get_cell_in_mouse_pos(event.x, event.y)
+        if self._selected_cell:
+            self._selected_cell.highlight(self._selected_cell.bg_color)
+        if cell and cell.buff_applied != self._selected_buff:
+            cell.highlight(self._selected_buff.color)
+            self._selected_cell = cell
 
-    def _get_cell_in_mouse_pos(self, mouse_pos) -> Cell:
-        x, y = mouse_pos.x, mouse_pos.y
+    def _on_mouse_click(self, event) -> None:
+        cell = self._get_cell_in_mouse_pos(event.x, event.y)
+        if cell:
+            cell.apply_buff(self._selected_buff)
+
+    def _get_cell_in_mouse_pos(self, x, y) -> Cell:
         left_limit, top_limit = self._x1, self._y1
         right_limit = self._x1 + self._cell_size * self._col_count
         bottom_limit = self._y1 + self._cell_size * self._row_count
