@@ -110,12 +110,14 @@ class Maze:
             seed=None
         ):
         self._cells = []
+        self._cell_types = [buff for buff in Buff]
+        self._cell_type_idx = 0
+        self._selected_cell_type = self._cell_types[self._cell_type_idx]
         self._x1 = x1
         self._y1 = y1
         self._row_count = row_count
         self._col_count = col_count
         self._cell_size = cell_size
-        self._selected_buff = Buff.RED
         self._selected_cell = None
         self._win = win
         self._win.add_button("SOLVE", 5, 5, self.solve)
@@ -126,7 +128,8 @@ class Maze:
         self._build_a_maze((0, 0, 'place_holder'))
         self._reset_cells_visited()
         self._win.add_mouse_listener(lambda e: self._on_mouse_pos_change(e))
-        self._win.add_mouse_click_listener(lambda e: self._on_mouse_click(e))
+        self._win.add_m1_click_listener(lambda e: self._on_m1_click(e))
+        self._win.add_m3_click_listener(lambda e: self._on_m3_click(e))
 
     def _create_cells(self):
         for i in range(self._row_count):
@@ -154,16 +157,22 @@ class Maze:
 
     def _on_mouse_pos_change(self, event) -> None:
         cell = self._get_cell_in_mouse_pos(event.x, event.y)
+
         if self._selected_cell:
             self._selected_cell.highlight(self._selected_cell.bg_color)
-        if cell and cell.buff_applied != self._selected_buff:
-            cell.highlight(self._selected_buff.color)
+
+        if cell and cell.buff_applied != self._selected_cell_type:
+            cell.highlight(self._selected_cell_type.color)
             self._selected_cell = cell
 
-    def _on_mouse_click(self, event) -> None:
+    def _on_m1_click(self, event) -> None:
         cell = self._get_cell_in_mouse_pos(event.x, event.y)
         if cell:
-            cell.apply_buff(self._selected_buff)
+            cell.apply_buff(self._selected_cell_type)
+
+    def _on_m3_click(self, event) -> None:
+        self._rotate_cell_type()
+        self._on_mouse_pos_change(event)
 
     def _get_cell_in_mouse_pos(self, x, y) -> Cell:
         left_limit, top_limit = self._x1, self._y1
@@ -179,6 +188,11 @@ class Maze:
         col = (x - self._x1) // self._cell_size
 
         return self._cells[row][col]
+    
+    def _rotate_cell_type(self):
+        self._cell_type_idx += 1
+        self._cell_type_idx %= len(self._cell_types)
+        self._selected_cell_type = self._cell_types[self._cell_type_idx]
 
     def _create_entrance_and_exit(self):
         entrance_row, entrance_col = 0, 0

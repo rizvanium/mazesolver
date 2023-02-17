@@ -39,8 +39,11 @@ class Window:
     def add_mouse_listener(self, callback):
         self.__root.bind('<Motion>', callback)
 
-    def add_mouse_click_listener(self, callback):
+    def add_m1_click_listener(self, callback):
         self.__root.bind('<Button-1>', callback)
+
+    def add_m3_click_listener(self, callback):
+        self.__root.bind('<Button-3>', callback)
 
     def close(self):
         self.__running = False
