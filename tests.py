@@ -1,5 +1,6 @@
 import unittest
 from maze import Maze
+from ds import UnionFind
 
 class Tests(unittest.TestCase):
     def test_maze_create_cells(self):
@@ -33,8 +34,60 @@ class Tests(unittest.TestCase):
                     break;
         
         self.assertEqual(all_unvisited, True)
-         
 
+    def test_union_find_created_correctly(self):
+        size = 10
+        uf = UnionFind(size)
+        self.assertEqual(uf.size, size)
+        self.assertEqual(uf.component_count, size)
+        self.assertEqual(len(uf.ids), size)
+        self.assertEqual(len(uf.sizes), size)
+         
+    def test_union_unify_works_correctly(self):
+        size = 10
+        uf = UnionFind(size)
+        p, q, z = 0, size // 2, size - 1
+        print(f"p={p} q={q} z={z}")
+
+        p_set_id, q_set_id, z_set_id = uf.find(p), uf.find(q), uf.find(z)
+        print(f"p_set={p_set_id} q_set={q_set_id} z_set={z_set_id}")
+
+        print("unifying p with q")
+        uf.unify(p, q)
+
+        p_set_id, q_set_id, z_set_id = uf.find(p), uf.find(q), uf.find(z)
+        print(f"p_set={p_set_id} q_set={q_set_id} z_set={z_set_id}")
+
+        print("unifying q with z")
+        uf.unify(q, z)
+
+        p_set_id, q_set_id, z_set_id = uf.find(p), uf.find(q), uf.find(z)
+        print(f"p_set={p_set_id} q_set={q_set_id} z_set={z_set_id}")
+
+        p_set_size = uf.get_set_size(p)
+        print(f"size of 'p' set: {p_set_size}")
+
+        self.assertEqual(p_set_id, q_set_id)
+        self.assertEqual(p_set_id, z_set_id)
+        self.assertEqual(p_set_size, 3)
+        
+    def test_union_connection_checking_works_correctly(self):
+        size = 10
+        uf = UnionFind(size)
+        p, q, z = 0, size // 2, size - 1
+        uf.unify(p, q)
+        pq_united = True
+        pz_united = False
+        qz_united = False
+
+        self.assertEqual(uf.check_if_connected(p, q), pq_united)
+        self.assertEqual(uf.check_if_connected(p, z), pz_united)
+        self.assertEqual(uf.check_if_connected(q, z), qz_united)
+        
+
+ 
+ 
 if __name__ == "__main__":
     unittest.main()
+
 

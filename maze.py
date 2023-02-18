@@ -121,12 +121,16 @@ class Maze:
         self._selected_cell = None
         self._win = win
         self._win.add_button("SOLVE", 5, 5, self.solve)
+
         if seed:
             random.seed(seed)
+        # TESTING
         self._create_cells()
         self._create_entrance_and_exit()
+        self.generate_kruskals()
         self._build_a_maze((0, 0, 'place_holder'))
         self._reset_cells_visited()
+
         self._win.add_mouse_listener(lambda e: self._on_mouse_pos_change(e))
         self._win.add_m1_click_listener(lambda e: self._on_m1_click(e))
         self._win.add_m3_click_listener(lambda e: self._on_m3_click(e))
@@ -249,6 +253,19 @@ class Maze:
             )
 
             self._build_a_maze(next)
+
+    def generate_kruskals(self):
+        total_cells = self._row_count * self._col_count
+        walls_down = 0
+        cells = [] 
+        for i in range(self._row_count):
+            for j in range(self._col_count):
+                cells.append({(i, j)})
+
+        print(cells)
+
+#        while walls_down < total_cells - 1:
+#            pass
     
     def _remove_wall_between_cells(self, cell1, cell2, c2_to_c1_relation):
         if c2_to_c1_relation == 'top':
