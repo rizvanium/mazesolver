@@ -1,5 +1,6 @@
 from enum import Enum
 from renders import Window, Line, Point, Rectangle
+from ds import UnionFind
 import time
 import random
 
@@ -120,7 +121,8 @@ class Maze:
         self._cell_size = cell_size
         self._selected_cell = None
         self._win = win
-        self._win.add_button("SOLVE", 5, 5, self.solve)
+        if self._win:
+            self._win.add_button("SOLVE", 5, 5, self.solve)
 
         if seed:
             random.seed(seed)
@@ -130,10 +132,11 @@ class Maze:
         self.generate_kruskals()
         self._build_a_maze((0, 0, 'place_holder'))
         self._reset_cells_visited()
-
-        self._win.add_mouse_listener(lambda e: self._on_mouse_pos_change(e))
-        self._win.add_m1_click_listener(lambda e: self._on_m1_click(e))
-        self._win.add_m3_click_listener(lambda e: self._on_m3_click(e))
+        
+        if self._win:
+            self._win.add_mouse_listener(lambda e: self._on_mouse_pos_change(e))
+            self._win.add_m1_click_listener(lambda e: self._on_m1_click(e))
+            self._win.add_m3_click_listener(lambda e: self._on_m3_click(e))
 
     def _create_cells(self):
         for i in range(self._row_count):
@@ -255,18 +258,31 @@ class Maze:
             self._build_a_maze(next)
 
     def generate_kruskals(self):
+        # associate walls with the cells they separate
+        walls = self._map_walls_to_cells() 
+        print(walls)
+        # associate walls with set ids in union_find DS
+        
         total_cells = self._row_count * self._col_count
         walls_down = 0
-        cells = [] 
-        for i in range(self._row_count):
-            for j in range(self._col_count):
-                cells.append({(i, j)})
 
-        print(cells)
 
 #        while walls_down < total_cells - 1:
 #            pass
     
+    def _map_walls_to_cells(self):
+        walls = []
+        for i in range(self._row_count):
+            for j in range(self._col_count):
+                cell_num = j + i * self._col_count
+                if j < self._col_count - 1:
+                    right_cell_num = j + 1 + i * self._col_count
+                    walls.append((cell_num, right_cell_num))
+                if i < self._row_count - 1:
+                    bot_cell_num = j + (i + 1) * self._col_count
+                    walls.append((cell_num, bot_cell_num)) 
+        return walls
+
     def _remove_wall_between_cells(self, cell1, cell2, c2_to_c1_relation):
         if c2_to_c1_relation == 'top':
             cell1.has_top_wall = False
