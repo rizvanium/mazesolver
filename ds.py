@@ -1,11 +1,10 @@
 class UnionFind:
     def __init__(self, size):
-
         if size <= 0:
             print("size must be gt zero")
             return
 
-        self.component_count = size
+        self.set_count = size
         self.size = size
         self.ids = []
         self.sizes = []
@@ -52,4 +51,4 @@ class UnionFind:
             self.sizes[root1] += self.sizes[root2]
             self.ids[root2] = root1
 
-        self.component_count -= 1
+        self.set_count -= 1

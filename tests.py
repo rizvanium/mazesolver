@@ -39,7 +39,7 @@ class Tests(unittest.TestCase):
         size = 10
         uf = UnionFind(size)
         self.assertEqual(uf.size, size)
-        self.assertEqual(uf.component_count, size)
+        self.assertEqual(uf.set_count, size)
         self.assertEqual(len(uf.ids), size)
         self.assertEqual(len(uf.sizes), size)
          
@@ -47,25 +47,11 @@ class Tests(unittest.TestCase):
         size = 10
         uf = UnionFind(size)
         p, q, z = 0, size // 2, size - 1
-        print(f"p={p} q={q} z={z}")
-
-        p_set_id, q_set_id, z_set_id = uf.find(p), uf.find(q), uf.find(z)
-        print(f"p_set={p_set_id} q_set={q_set_id} z_set={z_set_id}")
-
-        print("unifying p with q")
         uf.unify(p, q)
-
-        p_set_id, q_set_id, z_set_id = uf.find(p), uf.find(q), uf.find(z)
-        print(f"p_set={p_set_id} q_set={q_set_id} z_set={z_set_id}")
-
-        print("unifying q with z")
         uf.unify(q, z)
 
         p_set_id, q_set_id, z_set_id = uf.find(p), uf.find(q), uf.find(z)
-        print(f"p_set={p_set_id} q_set={q_set_id} z_set={z_set_id}")
-
         p_set_size = uf.get_set_size(p)
-        print(f"size of 'p' set: {p_set_size}")
 
         self.assertEqual(p_set_id, q_set_id)
         self.assertEqual(p_set_id, z_set_id)
